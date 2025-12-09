@@ -11,6 +11,17 @@ npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
+## Database Setup
+
+```bash
+# Run schema in Supabase SQL Editor
+supabase/schema.sql    # Tables + RLS policies
+supabase/storage.sql   # Storage bucket for PDFs
+
+# Demo data (after signing in to get your Clerk user_id)
+supabase/seed.sql      # 5 customers, 5 invoices with items
+```
+
 ## Project Overview
 
 InvoiceFlow is a German-language invoice management application for freelancers built with Next.js 16 (App Router), Clerk authentication, and Supabase (PostgreSQL).
@@ -26,10 +37,24 @@ src/app/
 │   └── sign-up/[[...sign-up]]/
 ├── (protected)/               # Authenticated routes (middleware-protected)
 │   ├── dashboard/
-│   ├── invoices/
-│   ├── invoices/new/
+│   │   ├── page.tsx
+│   │   └── actions.ts         # getDashboardStats()
 │   ├── customers/
+│   │   ├── page.tsx
+│   │   └── actions.ts         # CRUD operations
+│   ├── invoices/
+│   │   ├── page.tsx           # Invoice list with status filter
+│   │   ├── actions.ts         # getInvoices(), updateStatus(), delete()
+│   │   ├── new/
+│   │   │   ├── page.tsx
+│   │   │   └── actions.ts     # createInvoice()
+│   │   └── [id]/
+│   │       ├── page.tsx       # Invoice detail view
+│   │       └── pdf/
+│   │           └── route.ts   # PDF download API route
 │   ├── settings/
+│   │   ├── page.tsx
+│   │   └── actions.ts         # get/saveUserSettings()
 │   └── layout.tsx             # Sidebar layout wrapper
 ├── page.tsx                   # Landing page
 └── layout.tsx                 # Root layout (ClerkProvider + PrelineScript)
@@ -66,10 +91,17 @@ Schema files: `supabase/schema.sql`, `supabase/storage.sql`
 
 - `formatCurrency(amount)` - Euro format (de-DE)
 - `formatDate(dateString)` - German short date (dd.MM.yyyy)
-- `calculateInvoiceTotals(items)` - Returns { netTotal, vatTotal, grossTotal }
+- `calculateInvoiceTotals(items)` - Returns { net_total, vat_total, gross_total }
+- `calculateItemAmounts(qty, price, vat)` - Returns { net_amount, vat_amount, gross_amount }
 - `generateInvoiceNumber(prefix, nextNumber)` - Pads to 4 digits
 - `getStatusColor(status)` / `getStatusLabel(status)` - Badge styling
 - `cn(...inputs)` - Tailwind class merging (clsx + tailwind-merge)
+
+### PDF Generation (`src/lib/pdf/`)
+
+- `InvoiceTemplate.tsx` - @react-pdf/renderer template for German invoices
+- `generateInvoicePdf.ts` - Server-side PDF generation function
+- PDF download via `/invoices/[id]/pdf` API route
 
 ### Type Definitions
 
@@ -82,5 +114,12 @@ Database types in `src/types/database.ts`:
 - **Language**: All UI text, labels, and validation messages are in German
 - **Path aliases**: Use `@/` for imports from `src/` directory
 - **Components**: Server components by default; add `"use client"` only when needed
+- **Server Actions**: Co-located `actions.ts` files with `"use server"` directive
 - **Styling**: Tailwind utility classes; use `cn()` helper for conditional classes
 - **Preline**: JavaScript auto-initializes via PrelineScript component on route changes
+
+## Known Workarounds
+
+- **Zod v4 + @hookform/resolvers**: Use `zodResolver(schema) as any` due to type mismatch
+- **Zod errors**: Access via `error.issues[0]` (not `error.errors[0]`)
+- **PDF Buffer**: Convert to `new Uint8Array(buffer)` for Response body
