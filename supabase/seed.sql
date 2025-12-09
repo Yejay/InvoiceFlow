@@ -16,7 +16,7 @@
 -- Example: user_2abc123def456...
 DO $$
 DECLARE
-  demo_user_id VARCHAR(255) := 'YOUR_CLERK_USER_ID';  -- <-- REPLACE THIS
+  demo_user_id VARCHAR(255) := 'user_36c0cdxS88j1RihBqOwZxEw34Ei';  -- <-- REPLACE THIS
 
   -- Customer IDs (will be generated)
   customer_1_id UUID;
