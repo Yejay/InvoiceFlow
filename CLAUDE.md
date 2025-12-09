@@ -5,10 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-npm run dev      # Start dev server with Turbopack (http://localhost:3000)
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run dev           # Start dev server with Turbopack (http://localhost:3000)
+npm run build         # Production build
+npm run start         # Start production server
+npm run lint          # Run ESLint
+
+# Unit tests (Vitest)
+npm run test          # Run Vitest in watch mode
+npm run test:run      # Run tests once
+npm run test:coverage # Run tests with coverage report
+
+# E2E tests (Playwright)
+npm run test:e2e      # Run E2E tests (starts dev server automatically)
+npm run test:e2e:ui   # Run E2E tests with Playwright UI
+npm run test:e2e:debug # Debug E2E tests
 ```
 
 ## Database Setup
@@ -86,6 +96,7 @@ Schema files: `supabase/schema.sql`, `supabase/storage.sql`
 - **PDF**: @react-pdf/renderer for invoice generation
 - **UI**: Tailwind CSS + Preline components + @tailwindcss/forms
 - **Dates**: date-fns with German locale
+- **Testing**: Vitest for unit tests, Playwright for E2E tests
 
 ### Utility Functions (`src/lib/utils.ts`)
 
