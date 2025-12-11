@@ -6,6 +6,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* AG Grid text visibility fix */
+.ag-theme-alpine .ag-cell {
+  color: #1f2937; /* gray-800 */
+}
+
+.ag-theme-alpine .ag-cell-value {
+  color: #1f2937;
+}
+
+.ag-theme-alpine .ag-input-field-input {
+  color: #1f2937 !important;
+}
+
+.ag-theme-alpine .ag-text-field-input {
+  color: #1f2937 !important;
+}
+
+/* Form input text visibility fix */
+input,
+select,
+textarea {
+  color: #111827; /* gray-900 */
+}
+
+input[type="date"] {
+  color: #111827;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+}
+
+select option {
+  color: #111827;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

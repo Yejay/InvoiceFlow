@@ -107,7 +107,7 @@ export default function InvoiceForm({
   };
 
   const inputClassName =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+    "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
