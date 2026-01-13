@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 import { updateInvoiceStatus, deleteInvoice, type InvoiceWithItems } from "@/app/(protected)/invoices/actions";
+import { sendInvoiceByEmail } from "@/app/(protected)/invoices/[id]/actions";
 import type { UserSettings } from "@/app/(protected)/settings/actions";
 
 type InvoiceDetailProps = {
@@ -15,7 +16,9 @@ export default function InvoiceDetail({ invoice, settings }: InvoiceDetailProps)
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleStatusChange = async (newStatus: "draft" | "open" | "paid" | "cancelled") => {
     setIsUpdating(true);
@@ -49,12 +52,44 @@ export default function InvoiceDetail({ invoice, settings }: InvoiceDetailProps)
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!invoice.customers.email) {
+      setError("Der Kunde hat keine E-Mail-Adresse hinterlegt.");
+      return;
+    }
+
+    if (!confirm(`Rechnung an ${invoice.customers.email} senden?`)) {
+      return;
+    }
+
+    setIsSendingEmail(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    const result = await sendInvoiceByEmail(invoice.id);
+
+    if (result.success) {
+      setSuccessMessage(`Rechnung erfolgreich an ${invoice.customers.email} gesendet!`);
+    } else {
+      setError(result.error || "Fehler beim E-Mail-Versand");
+    }
+
+    setIsSendingEmail(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Error Message */}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
           {error}
+        </div>
+      )}
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+          {successMessage}
         </div>
       )}
 
@@ -102,6 +137,20 @@ export default function InvoiceDetail({ invoice, settings }: InvoiceDetailProps)
                 Stornieren
               </button>
             )}
+
+            {/* E-Mail Button */}
+            <button
+              type="button"
+              onClick={handleSendEmail}
+              disabled={isSendingEmail || !invoice.customers.email}
+              title={!invoice.customers.email ? "Kunde hat keine E-Mail-Adresse" : "Rechnung per E-Mail senden"}
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              {isSendingEmail ? "Wird gesendet..." : "Per E-Mail senden"}
+            </button>
 
             {/* PDF Download Button */}
             <a

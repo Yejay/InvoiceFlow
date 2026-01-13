@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getInvoice } from "../../actions";
 import { getUserSettings } from "../../../settings/actions";
-import { generateInvoicePdf } from "@/lib/pdf/generateInvoicePdf";
+import { generateZugferdPdf } from "@/lib/zugferd/generateZugferdPdf";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -34,7 +34,8 @@ export async function GET(
   }
 
   try {
-    const pdfBuffer = await generateInvoicePdf(invoice, settings);
+    // Generiere ZUGFeRD-konforme PDF/A-3b mit eingebettetem XML
+    const pdfBuffer = await generateZugferdPdf(invoice, settings);
 
     const filename = `Rechnung_${invoice.invoice_number}.pdf`;
 
@@ -47,7 +48,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error generating PDF:", error);
+    console.error("Error generating ZUGFeRD PDF:", error);
     return new NextResponse("Error generating PDF", { status: 500 });
   }
 }
